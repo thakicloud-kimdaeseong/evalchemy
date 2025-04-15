@@ -115,7 +115,7 @@ def main():
     # Create sbatch
     args_dict = vars(args)
     args_dict["time_limit"] = f"{args.max_job_duration:02d}:00:00"
-    args_dict["job_name"] = f"{output_dataset_name}"
+    args_dict["job_name"] = f"eval_{output_dataset_name}"
     args_dict["input_dataset"] = input_dataset
     args_dict["output_dataset"] = output_dataset
     args_dict["logs_dir"] = logs_dir
