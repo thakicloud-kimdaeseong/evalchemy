@@ -113,7 +113,7 @@ class LiveCodeBenchV5Benchmark(BaseBenchmark):
                 all_instances.append(instance)
 
             # Generate model responses
-            self.logger.info("Generating responses for LiveCodeBenchiV5...")
+            self.logger.info("Generating responses for LiveCodeBenchV5...")
             outputs = self.compute(model, all_instances)
             all_outputs.append(outputs)
 
