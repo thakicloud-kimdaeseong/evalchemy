@@ -19,7 +19,7 @@ module load cuda/12.4 nccl/12.4
 source /work/08134/negin/anaconda3/bin/activate evalchemy
 
 # DCFT DIRECTORIES
-export DCFT=/work/10159/rmarten/vista/dcft/evalchemy
+export DCFT=/work/10159/rmarten/vista/dcft
 export EVALCHEMY=$DCFT/evalchemy
 export HF_HUB_CACHE=$DCFT/hub
 
