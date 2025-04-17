@@ -18,10 +18,8 @@ module load cuda/12.4 nccl/12.4
 # CONDA
 source /work/08134/negin/anaconda3/bin/activate evalchemy
 
-# DCFT DIRECTORIES
-export DCFT=/work/10159/rmarten/vista/dcft
-export EVALCHEMY=$DCFT/evalchemy
-export HF_HUB_CACHE=$DCFT/hub
+# DIRECTORIES - EVALCHEMY and HF_HUB_CACHE
+source /work/10159/rmarten/vista/dcft/hpc/dotenv/tacc.env
 
 # DOWNLOAD MODEL AND DATASET
 MODEL_NAME={model_name}
