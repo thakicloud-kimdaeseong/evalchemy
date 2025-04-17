@@ -15,11 +15,11 @@ set -e
 # MODULES
 module load cuda/12.4 nccl/12.4
 
-# CONDA
-source /work/08134/negin/anaconda3/bin/activate evalchemy
+# ENVIRONMENT VARIABLES - EVALCHEMY, HF_HUB_CACHE, and EVALCHEMY_ACTIVATE_ENV
+source /work/10159/rmarten/vista/dcft/dcft_private/hpc/dotenv/tacc.env
 
-# DIRECTORIES - EVALCHEMY and HF_HUB_CACHE
-source /work/10159/rmarten/vista/dcft/hpc/dotenv/tacc.env
+# CONDA
+$EVALCHEMY_ACTIVATE_ENV
 
 # DOWNLOAD MODEL AND DATASET
 MODEL_NAME={model_name}
