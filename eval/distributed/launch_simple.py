@@ -102,7 +102,7 @@ def main():
     parser.add_argument(
         "--tasks",
         type=str,
-        default="AIME24,AMC23,MATH500,MMLUPro,JEEBench,GPQADiamond,LiveCodeBench,CodeElo",
+        default="AIME24,AMC23,MATH500,MMLUPro,JEEBench,GPQADiamond,LiveCodeBench,CodeElo,CodeForces",
         help="Comma-separated list of tasks to evaluate",
     )
     parser.add_argument("--model_name", type=str, required=True, help="Model name/path to evaluate")
