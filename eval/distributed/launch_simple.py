@@ -116,6 +116,9 @@ def main():
     )
     parser.add_argument("--system_instruction", type=str, default=None, help="System instruction for the model")
     parser.add_argument("--timestamp", action="store_true", help="Add a timestamp to the output evaluation dataset")
+    parser.add_argument(
+        "--dependency", type=str, default=None, help="Dependency for the sbatch job. (e.g. afterok:123456)"
+    )
     args = parser.parse_args()
 
     # Generate evaluation dataset hash
@@ -167,7 +170,7 @@ def main():
 
     # Launch sbatch
     new_sbatch_file = os.path.join(logs_dir, f"{output_dataset_name}.sbatch")
-    job_id = launch_sbatch(sbatch_content, new_sbatch_file)
+    job_id = launch_sbatch(sbatch_content, new_sbatch_file, dependency=args.dependency)
     print(f"Launched sbatch job with ID: {job_id}")
     print(f"Logs: {args_dict['logs_dir']}/{args_dict['job_name']}_{job_id}*.out")
 
