@@ -81,19 +81,20 @@ def create_evaluation_dataset(tasks, eval_dataset_hash, system_instruction=None)
     return cached_dataset_id
 
 
-def launch_sbatch(sbatch_content, new_sbatch_file):
+def launch_sbatch(sbatch_content, new_sbatch_file, dependency=None):
     # Write the sbatch file
     with open(new_sbatch_file, "w") as f:
         f.write(sbatch_content)
     print(f"Created sbatch file: {new_sbatch_file}")
 
-    # Launch the sbatch job
-    stdout = execute_command(f"sbatch {new_sbatch_file}")
-    job_id_match = re.search(r"Submitted batch job (\d+)", stdout)
-    if job_id_match:
-        job_id = job_id_match.group(1)
+    if dependency is not None:
+        sbatch_cmd = f"sbatch --dependency={dependency} {new_sbatch_file}"
     else:
-        raise Exception("Could not determine job ID from sbatch output.")
+        sbatch_cmd = f"sbatch {new_sbatch_file}"
+
+    # Launch the sbatch job
+    job_id = subprocess.check_output(sbatch_cmd, shell=True).decode("utf-8").strip()
+    print(f"Job {job_id} submitted with dependency {dependency}.")
     return job_id
 
 
