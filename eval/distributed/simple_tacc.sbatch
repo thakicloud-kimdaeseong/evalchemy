@@ -8,6 +8,8 @@
 #SBATCH --output={logs_dir}/%x_%j.out
 #SBATCH --exclude=c610-021,c611-011
 #SBATCH --account CCR24067
+#SBATCH --mail-type=END,TIME_LIMIT,FAIL
+#SBATCH --mail-user=dcft-slurm-notifs-aaaap7wt363mcsgryaejj2o6dm@dogs-and-ml.slack.com
 
 # EXIT ON ERROR
 set -e

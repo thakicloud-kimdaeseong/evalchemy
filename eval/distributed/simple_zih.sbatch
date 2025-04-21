@@ -9,6 +9,8 @@
 #SBATCH --job-name={job_name}
 #SBATCH --output={logs_dir}/%x_%j.out
 #SBATCH --exclude=c77
+#SBATCH --mail-type=END,TIME_LIMIT,FAIL
+#SBATCH --mail-user=dcft-slurm-notifs-aaaap7wt363mcsgryaejj2o6dm@dogs-and-ml.slack.com
 
 # CUDA
 module load release/24.04  GCCcore/12.3.0
