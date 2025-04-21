@@ -33,7 +33,7 @@ setfacl -R -d -m u::rwX,g::rwX,o::- $DCFT
 # Set up conda in the shared workspace
 mkdir -p $DCFT/miniconda3
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $DCFT/miniconda3/miniconda.sh
-bash $DCFT/miniconda3/miniconda.sh -b -u -p $WORK/miniconda3
+bash $DCFT/miniconda3/miniconda.sh -b -u -p $DCFT/miniconda3
 rm $DCFT/miniconda3/miniconda.sh
 source $DCFT/miniconda3/bin/activate
 conda init  # Adds conda initialization to ~/.bashrc
