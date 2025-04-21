@@ -29,6 +29,8 @@ ls -ld $DCFT # Should show p_finetuning ownership
 chmod -R u+rwX,g+rwX,o-rwx $DCFT
 # Set default ACLs for new files to maintain these permissions
 setfacl -R -d -m u::rwX,g::rwX,o::- $DCFT
+chmod g+s $DCFT
+umask 007
 
 # Set up conda in the shared workspace
 mkdir -p $DCFT/miniconda3
