@@ -16,8 +16,8 @@ Follow these steps to set up the environment on Capella:
 ```bash
 # Allocate a workspace
 # Guide: https://doc.zih.tu-dresden.de/quickstart/getting_started/?h=workspaces#allocate-a-workspace
-ws_allocate -F horse -r 7 -m ryanmarten2000@gmail.com -n DCFT_Shared -d 100
-echo "export DCFT=/data/horse/ws/ryma833h-DCFT_Shared" >> ~/.bashrc
+ws_allocate -F cat -r 7 -m ryanmarten2000@gmail.com -n dcft -d 100
+echo "export DCFT=/data/cat/ws/ryma833h-dcft" >> ~/.bashrc
 
 # Set up shared access for project members
 # Check your group membership
