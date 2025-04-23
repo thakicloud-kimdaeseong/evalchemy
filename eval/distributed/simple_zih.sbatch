@@ -20,9 +20,12 @@ export PATH=/usr/local/cuda-12/bin:$PATH
 export LD_LIBRARY_PATH=/usr/local/cuda-12/lib64:$LD_LIBRARY_PATH
 
 # ENVIRONMENT VARIABLES - EVALCHEMY, HF_HUB_CACHE, and EVALCHEMY_ACTIVATE_ENV
-source /data/horse/ws/ryma833h-DCFT_Shared/dcft_private/hpc/dotenv/zih.env
+export DCFT=/data/cat/ws/ryma833h-dcft
+source $DCFT/dcft_private/hpc/dotenv/zih.env
+source $DCFT/dcft_private/database/access.env
 
 # CONDA
+echo "Loading conda: $EVALCHEMY_ACTIVATE_ENV"
 $EVALCHEMY_ACTIVATE_ENV
 
 # DOWNLOAD MODEL AND DATASET
