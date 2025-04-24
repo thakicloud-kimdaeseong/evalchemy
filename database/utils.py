@@ -11,6 +11,7 @@ from database.config import DATABASE_URL
 from database.models import Base, Dataset, Model
 
 logger = logging.getLogger(__name__)
+import os
 import uuid
 from contextlib import contextmanager
 from datetime import datetime, timezone
