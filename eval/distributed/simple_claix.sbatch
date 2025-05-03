@@ -21,8 +21,8 @@ source $DCFT/dcft_private/hpc/dotenv/claix.env
 source $DCFT/dcft_private/database/access.env
 
 # CONDA
-echo "Loading conda: $EVALCHMEY_ACTIVATE_ENV"
-$EVALCHMEY_ACTIVATE_ENV
+echo "Loading conda: $EVALCHEMY_ACTIVATE_ENV"
+$EVALCHEMY_ACTIVATE_ENV
 
 # DOWNLOAD MODEL AND DATASET
 MODEL_NAME={model_name}
