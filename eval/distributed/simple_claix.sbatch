@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --nodes={num_nodes}
-#SBATCH --ntasks-per-node={gpus_per_node}
-#SBATCH --gres=gpu:{gpus_per_node}
+#SBATCH --ntasks-per-node=4
+#SBATCH --gres=gpu:4
 #SBATCH --time={time_limit}
 #SBATCH --cpus-per-task=96
 #SBATCH --account=rwth1775
