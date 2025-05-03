@@ -3,7 +3,7 @@
 #SBATCH --ntasks-per-node=4
 #SBATCH --gres=gpu:4
 #SBATCH --time={time_limit}
-#SBATCH --cpus-per-task=96
+#SBATCH --cpus-per-task=24
 #SBATCH --account=rwth1775
 #SBATCH --partition=c23g
 #SBATCH --job-name={job_name}
