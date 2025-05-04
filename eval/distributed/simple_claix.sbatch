@@ -11,6 +11,9 @@
 #SBATCH --mail-type=END,TIME_LIMIT,FAIL
 #SBATCH --mail-user=dcft-slurm-notifs-aaaap7wt363mcsgryaejj2o6dm@dogs-and-ml.slack.com
 
+# EXIT ON ERROR
+set -e
+
 # CUDA
 module load CUDA/12.6.0
 module load imkl/2023.2.0
