@@ -39,6 +39,12 @@ clusters = [
         "gpus_per_node": 4,
         "internet": True,
     },
+    {
+        "name": "leonardo",
+        "hostname_pattern": r".*leonardo.*",
+        "eval_sbatch_filename": "simple_leonardo.sbatch",
+        "gpus_per_node": 4,
+    },
 ]
 
 
