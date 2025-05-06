@@ -22,6 +22,12 @@ clusters = [
         "eval_sbatch_filename": "simple_tacc.sbatch",
         "gpus_per_node": 1,
     },
+    {
+        "name": "leonardo",
+        "hostname_pattern": r".*leonardo.*",
+        "eval_sbatch_filename": "simple_leonardo.sbatch",
+        "gpus_per_node": 4,
+    },
 ]
 
 
