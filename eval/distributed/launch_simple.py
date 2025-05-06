@@ -7,7 +7,8 @@ import socket
 import subprocess
 import time
 
-from huggingface_hub import HfApi
+from datasets import load_dataset
+from huggingface_hub import HfApi, snapshot_download
 
 clusters = [
     {
@@ -15,12 +16,27 @@ clusters = [
         "hostname_pattern": r"c\d",
         "eval_sbatch_filename": "simple_zih.sbatch",
         "gpus_per_node": 4,
+        "internet": True,
     },
     {
         "name": "vista",
         "hostname_pattern": r".*?.vista.tacc.utexas.edu",
         "eval_sbatch_filename": "simple_tacc.sbatch",
         "gpus_per_node": 1,
+        "internet": True,
+    },
+    {
+        "name": "jureca",
+        "hostname_pattern": r"jr.*?.jureca",
+        "eval_sbatch_filename": "simple_jureca.sbatch",
+        "gpus_per_node": 4,
+        "internet": False,
+    },
+    {
+        "name": "claix",
+        "hostname_pattern": r".*?.hpc.itc.rwth-aachen.de",
+        "eval_sbatch_filename": "simple_claix.sbatch",
+        "gpus_per_node": 4,
     },
     {
         "name": "leonardo",
@@ -159,8 +175,22 @@ def main():
         )
     num_nodes = int(args.num_shards / cluster["gpus_per_node"])
 
-    # Create sbatch
+    # Args
     args_dict = vars(args)
+
+    if not cluster["internet"]:
+        output_dataset = os.path.join(os.environ["EVALCHEMY_RESULTS_DIR"], output_dataset.split("/")[-1])
+        print(
+            f"Downloading model and dataset due to offline mode, will only save shards to {output_dataset} and won't upload or score"
+        )
+        HF_HUB_CACHE = os.environ["HF_HUB_CACHE"]
+        dataset_path = snapshot_download(repo_id=input_dataset, cache_dir=HF_HUB_CACHE, repo_type="dataset")
+        load_dataset(input_dataset, split="train", cache_dir=HF_HUB_CACHE)
+        model_path = snapshot_download(repo_id=args.model_name, cache_dir=HF_HUB_CACHE)
+        input_dataset = dataset_path
+        args_dict["model_name"] = model_path
+
+    # Create sbatch
     args_dict["num_nodes"] = num_nodes
     args_dict["time_limit"] = f"{args.max_job_duration:02d}:00:00"
     args_dict["job_name"] = f"{output_dataset_name}"
@@ -175,10 +205,12 @@ def main():
     sbatch_content = re.sub(curly_brace_pattern, lambda m: str(args_dict[m.group(1)]), sbatch_content)
 
     # Launch sbatch
-    new_sbatch_file = os.path.join(logs_dir, f"{output_dataset_name}.sbatch")
+    job_logs_dir = os.path.join(logs_dir, f"{output_dataset_name}")
+    os.makedirs(job_logs_dir, exist_ok=True)
+    new_sbatch_file = os.path.join(job_logs_dir, f"{output_dataset_name}.sbatch")
     job_id = launch_sbatch(sbatch_content, new_sbatch_file, dependency=args.dependency)
     print(f"Launched sbatch job with ID: {job_id}")
-    print(f"Logs: {args_dict['logs_dir']}/{args_dict['job_name']}_{job_id}*.out")
+    print(f"Logs: {job_logs_dir}/{job_id}*.out")
 
 
 if __name__ == "__main__":
