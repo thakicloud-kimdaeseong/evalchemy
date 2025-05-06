@@ -37,6 +37,7 @@ clusters = [
         "hostname_pattern": r".*?.hpc.itc.rwth-aachen.de",
         "eval_sbatch_filename": "simple_claix.sbatch",
         "gpus_per_node": 4,
+        "internet": True,
     },
 ]
 
