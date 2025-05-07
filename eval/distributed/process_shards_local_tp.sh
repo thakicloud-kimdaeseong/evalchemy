@@ -17,18 +17,16 @@ echo "GLOBAL_SIZE: ${GLOBAL_SIZE}"
 mkdir -p ${OUTPUT_DATASET}
 
 # Run each shard on a separate GPU
-for RANK in {0..7}; do
-  # Print config for this rank
-  echo -e "\nProcessing RANK: ${RANK}"
-  echo -e "GLOBAL_SIZE: ${GLOBAL_SIZE}\nRANK: ${RANK}\nMODEL: ${MODEL_NAME}\nINPUT_DATASET: ${INPUT_DATASET}\nOUTPUT_DATASET: ${OUTPUT_DATASET}"
-  
-  # Launch process on specific GPU
-  CUDA_VISIBLE_DEVICES=$RANK python eval/distributed/process_shard.py \
-    --global_size ${GLOBAL_SIZE} \
-    --rank ${RANK} \
+for i in 0 4; do
+  DEVICES=$(seq -s, $i $((i+3)))
+  RANK=$((i / 4))
+  echo "Launching RANK $RANK on GPUs $DEVICES"
+  CUDA_VISIBLE_DEVICES=$DEVICES python eval/distributed/process_shard.py \
+    --global_size 2 \
+    --rank $RANK \
+    --tp 4 \
     --input_dataset ${INPUT_DATASET} \
     --model_name ${MODEL_NAME} \
-    --tp 4 \
     --output_dataset ${OUTPUT_DATASET} &
     
   # Add a small delay between launches to avoid race conditions
