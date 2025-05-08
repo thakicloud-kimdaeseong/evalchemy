@@ -5,6 +5,7 @@ export GLOBAL_SIZE=8
 export MODEL_NAME="open-thoughts/OpenThinker-7B"
 export INPUT_DATASET="mlfoundations-dev/evalset_0981"
 export OUTPUT_DATASET="results/OpenThinker-7B_evalset_2870"
+export VLLM_WORKER_MULTIPROC_METHOD="spawn"
 
 # Print the current configuration
 echo "Starting local processing with the following configuration:"
