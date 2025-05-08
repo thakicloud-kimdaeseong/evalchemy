@@ -493,13 +493,6 @@ def monitor_local_job(job_id, logs_dir, num_shards, watchdog_interval_min=1):
                 ("Completed shards", f'grep -c "Shard successfully processed" {log_file}'),
             ]
             
-            with open(log_file, "r") as f:
-                lines = f.readlines()
-
-            # Print the last 200 lines (or all if there are fewer)
-            for line in lines[-200:]:
-                print(line, end="")
-                
             results = {}
             for label, cmd in progress_metrics:
                 stdout, _, _ = execute_command(cmd, verbose=False)
