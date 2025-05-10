@@ -8,7 +8,7 @@
 #SBATCH --account=p_finetuning
 #SBATCH --job-name={job_name}
 #SBATCH --output={logs_dir}/%x/%j.out
-#SBATCH --exclude=c77
+#SBATCH --exclusive
 #SBATCH --mail-type=END,TIME_LIMIT,FAIL
 #SBATCH --mail-user=dcft-slurm-notifs-aaaap7wt363mcsgryaejj2o6dm@dogs-and-ml.slack.com
 
