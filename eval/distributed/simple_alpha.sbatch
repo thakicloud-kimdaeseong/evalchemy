@@ -1,7 +1,9 @@
 #!/bin/bash
 #SBATCH --nodes={num_nodes}
-#SBATCH --ntasks-per-node=4
-#SBATCH --gres=gpu:4
+#SBATCH --ntasks-per-node=8
+#SBATCH --gres=gpu:8
+#SBATCH --mem=768G
+#SBATCH --cpus-per-task=4
 #SBATCH --time={time_limit}
 #SBATCH --account=p_finetuning
 #SBATCH --job-name={job_name}
