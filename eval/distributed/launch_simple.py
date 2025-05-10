@@ -29,7 +29,7 @@ clusters = [
         "name": "alpha",
         "hostname_pattern": r".*?.alpha.hpc.tu-dresden.de",
         "eval_sbatch_filename": "simple_alpha.sbatch",
-        "gpus_per_node": 4,
+        "gpus_per_node": 8,
         "internet": True,
     },
     {
