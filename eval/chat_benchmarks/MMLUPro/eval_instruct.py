@@ -4,6 +4,8 @@ import time
 import logging
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
+import math
+import numpy as np
 
 from datasets import load_dataset
 from transformers import AutoTokenizer
@@ -173,28 +175,40 @@ class MMLUProBenchmark(BaseBenchmark):
     def evaluate_responses(self, results: Dict[str, Any]) -> Dict[str, float]:
         if results is None:
             return None
-
-        examples = results['examples']
-        area_stats = defaultdict(lambda: {'corr': 0, 'total': 0})
-        total_corr = 0
-        total = 0
-
+    
+        examples: List[Dict[str, Any]] = results["examples"]
+        area_stats = defaultdict(lambda: {"corr": 0, "total": 0})
+        correct_flags: List[int] = []          # collect 1/0 for each example
+    
+        # accumulate per‑example correctness
         for ex in examples:
-            cat = ex['category']
-            correct = (ex['pred'] == ex['answer'])
-            area_stats[cat]['total'] += 1
-            area_stats[cat]['corr'] += int(correct)
-            total += 1
-            total_corr += int(correct)
-
-        out = {
-            'overall_accuracy': total_corr / total if total else 0.0,
-            'total_examples': total,
+            cat = ex["category"]
+            correct = int(ex["pred"] == ex["answer"])
+            area_stats[cat]["total"] += 1
+            area_stats[cat]["corr"] += correct
+            correct_flags.append(correct)
+    
+        n = len(correct_flags)
+        flags_arr = np.asarray(correct_flags, dtype=float)
+    
+        # micro accuracy and its **empirical** standard error
+        overall_accuracy = float(flags_arr.mean())
+        overall_accuracy_stderr = float(flags_arr.std(ddof=1) / math.sqrt(n))
+    
+        out: Dict[str, float] = {
+            "accuracy_avg": overall_accuracy,
+            "accuracy_std_err": overall_accuracy_stderr,
+            "total_examples": n,
+            "num_repeat": self.n_repeat,
         }
-        # per-area accuracy
+    
+        # per‑category stats (needed for macro‑averages)
+        per_area_acc: List[float] = []
         for cat, vals in area_stats.items():
-            out[f'accuracy_{cat}'] = vals['corr'] / vals['total']
-            out[f'count_{cat}'] = vals['total']
-
+            acc = vals["corr"] / vals["total"]
+            out[f"accuracy_{cat}"] = acc
+            out[f"count_{cat}"] = vals["total"]
+            per_area_acc.append(acc)
+    
         return out
 
