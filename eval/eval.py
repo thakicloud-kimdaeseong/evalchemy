@@ -20,7 +20,8 @@ from lm_eval.api.model import LM
 from lm_eval.loggers import EvaluationTracker, WandbLogger
 from lm_eval.loggers.utils import add_env_info, add_tokenizer_info, get_git_commit_hash
 from lm_eval.tasks import TaskManager as PretrainTaskManager
-from lm_eval.utils import handle_non_serializable, sanitize_model_name, simple_parse_args_string
+from lm_eval.utils import sanitize_model_name, simple_parse_args_string
+from lm_eval.utils import handle_non_serializable as _orig_handle
 
 from eval.chat_benchmarks.curator_lm import CuratorAPIModel  # register curator model
 from eval.chat_benchmarks.precomputed_hf_lm import PrecomputedHFLM  # register precomputed_hf model
@@ -29,6 +30,20 @@ from eval.constants import LIST_OPENAI_MODELS
 from eval.eval_tracker import DCEvaluationTracker
 from eval.task import TaskManager as InstructTaskManager
 
+
+def handle_non_serializable_extended(o):
+    """
+    Like the stock harness helper, but also shortens gigantic SymPy
+    Integer/Rational objects so they don’t trip the 4 300‑digit guard.
+    """
+    try:
+        from sympy import Integer, Rational
+        if isinstance(o, (Integer, Rational)):
+            s = str(o)
+            return s if len(s) <= 120 else s[:120] + "…"
+    except ModuleNotFoundError: # SymPy not installed, fall through  
+        pass
+    return _orig_handle(o) # fall back to original helper
 
 def setup_custom_parser():
     """
@@ -549,7 +564,12 @@ def handle_evaluation_output(
     if args.log_samples:
         samples = results.pop("samples")
 
-    dumped = json.dumps(results, indent=2, default=handle_non_serializable, ensure_ascii=False)
+    dumped = json.dumps(
+        results,
+        indent=2,
+        default=handle_non_serializable_extended,
+        ensure_ascii=False,
+    )
     if args.show_config:
         print(dumped)
 
