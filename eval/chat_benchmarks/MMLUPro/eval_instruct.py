@@ -199,7 +199,6 @@ class MMLUProBenchmark(BaseBenchmark):
             "accuracy_avg": overall_accuracy,
             "accuracy_std_err": overall_accuracy_stderr,
             "total_examples": n,
-            "num_repeat": self.n_repeat,
         }
     
         # per‑category stats (needed for macro‑averages)
