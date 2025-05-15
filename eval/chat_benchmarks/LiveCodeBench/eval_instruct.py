@@ -21,29 +21,12 @@ if not HF_HUB_CACHE:
         "WARNING: HF_HUB_CACHE environment variable is not set, using default cache directory ~/.cache/huggingface/hub for LiveCodeBench benchmark"
     )
 
-# compile once at import time
-_CODE_FENCE = re.compile(r"```[^\n]*\n(.*?)```", re.S)
-_CODE_LIKE  = ("def ", "class ", "import ", "#")   # quick heuristics
 
-def has_code(response: str) -> List[str]:
-    """
-    Return a list of code blocks found in *response*.
-
-    * If triple-backtick fences are present, return their contents
-      (first group of the regex).
-    * Otherwise, if the text contains obvious code keywords, return the
-      entire response as one block.
-    * If nothing looks like code, return an empty list.
-    """
-    matches = _CODE_FENCE.findall(response)
-    if matches:
-        return matches
-
-    # no fences – is the text code-ish at all?
-    if any(tok in response for tok in _CODE_LIKE):
-        return [response]
-
-    return []
+def has_code(response):
+    pattern = r"```(?:[a-zA-Z]*)\n(.*?)```"
+    # Use re.DOTALL to match multiline content inside backticks
+    matches = re.findall(pattern, response, re.DOTALL)
+    return matches
 
 
 # Calculate mean and standard error for all metrics
