@@ -31,8 +31,12 @@ def has_code(response):
 
 # Calculate mean and standard error for all metrics
 def calc_stats(values):
-    mean = np.mean(values)
-    stderr = np.std(values, ddof=1) / np.sqrt(len(values))
+    arr    = np.asarray(values, dtype=float)
+    mask   = ~np.isnan(arr)
+    if mask.sum() == 0:          # all NaNs → undefined; return 0,0
+        return 0.0, 0.0
+    mean   = arr[mask].mean()
+    stderr = np.std(arr[mask], ddof=1) / np.sqrt(mask.sum())
     return mean, stderr
 
 
