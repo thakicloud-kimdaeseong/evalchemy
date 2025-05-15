@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import time
+import math
 from typing import Dict, List, Optional, Union
 
 import lm_eval.api.metrics
@@ -31,19 +32,33 @@ from eval.eval_tracker import DCEvaluationTracker
 from eval.task import TaskManager as InstructTaskManager
 
 
+_BIT_CAP = 15_000 
 def handle_non_serializable_extended(o):
     """
-    Like the stock harness helper, but also shortens gigantic SymPy
-    Integer/Rational objects so they don’t trip the 4 300‑digit guard.
+    Delegates to the stock helper, but for gigantic SymPy Integer /
+    Rational objects returns a short placeholder *without* calling str().
     """
     try:
         from sympy import Integer, Rational
-        if isinstance(o, (Integer, Rational)):
-            s = str(o)
-            return s if len(s) <= 120 else s[:120] + "…"
-    except ModuleNotFoundError: # SymPy not installed, fall through  
+        if isinstance(o, Integer):
+            if o.p.bit_length() > _BIT_CAP:
+                digits = int(o.p.bit_length() * math.log10(2)) + 1
+                return f"<Integer ~{digits} digits>"
+            return str(int(o)) # safe: fits under the guard
+
+        if isinstance(o, Rational):
+            num_bits = o.p.bit_length()
+            den_bits = o.q.bit_length()
+            if num_bits > _BIT_CAP or den_bits > _BIT_CAP:
+                d_num = int(num_bits * math.log10(2)) + 1
+                d_den = int(den_bits * math.log10(2)) + 1
+                return f"<Rational {d_num}/{d_den} digits>"
+            return str(o)  # small enough
+    except ModuleNotFoundError:
         pass
-    return _orig_handle(o) # fall back to original helper
+
+    # Everything else: NumPy ints, sets, etc.
+    return _orig_handle(o)
 
 def setup_custom_parser():
     """
