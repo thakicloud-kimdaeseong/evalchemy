@@ -110,9 +110,15 @@ def setup_custom_parser():
         default="auto",
         help="Judge model used to evaluate generations. Example: gpt-4o-mini-2024-07-18",
     )
+    parser.add_argument(
+        "--max_tokens",
+        type=str,
+        default="auto",
+        help="Maximum length of model generatd tokens.",
+    )
 
     parser.add_argument(
-        "--config", type=str, help="Path to config yaml. Overwrites --batch_size, --tasks, and --annotator_model"
+        "--config", type=str, help="Path to config yaml. Overwrites --batch_size, --tasks, --annotator_model, and --max_tokens"
     )
     parser.add_argument(
         "--debug",
@@ -319,6 +325,7 @@ def cli_evaluate(args: Optional[argparse.Namespace] = None) -> None:
         args.tasks = ",".join([t["task_name"] for t in tasks_yaml["tasks"]])
         batch_sizes_list = [int(t["batch_size"]) if t["batch_size"] != "auto" else "auto" for t in tasks_yaml["tasks"]]
         args.annotator_model = tasks_yaml.get("annotator_model", args.annotator_model)
+        args.max_tokens = int(tasks_yaml.get("max_tokens", args.max_tokens))
     else:
         batch_sizes_list = [
             int(args.batch_size) if args.batch_size != "auto" else args.batch_size
@@ -357,6 +364,7 @@ def cli_evaluate(args: Optional[argparse.Namespace] = None) -> None:
     # Initialize tasks
     task_manager = InstructTaskManager(
         annotator_model=args.annotator_model,
+        max_tokens=args.max_tokens,
         debug=args.debug,
         seed=args.seed,
         task_list=task_list,
@@ -531,6 +539,7 @@ def add_results_metadata(results: Dict, batch_sizes_list: List[int], args: argpa
         "use_cache": args.use_cache,
         "limit": args.limit,
         "annotator_model": args.annotator_model,
+        "max_tokens": int(args.max_tokens),
         # "bootstrap_iters": args.bootstrap_iters,
         "gen_kwargs": args.gen_kwargs,
         "random_seed": args.seed[0],
