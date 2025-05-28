@@ -364,7 +364,7 @@ def cli_evaluate(args: Optional[argparse.Namespace] = None) -> None:
     # Initialize tasks
     task_manager = InstructTaskManager(
         annotator_model=args.annotator_model,
-        max_tokens=args.max_tokens,
+        max_tokens=int(args.max_tokens),
         debug=args.debug,
         seed=args.seed,
         task_list=task_list,
