@@ -29,7 +29,7 @@ class SWEBenchBenchmark(BaseBenchmark):
         dataset_name: str = "princeton-nlp/SWE-bench_Lite",
         debug: bool = False,
         logger: Optional[logging.Logger] = None,
-        max_tokens: int = 4096,
+        max_tokens: int = 32768,
         system_instruction: Optional[str] = None,
     ):
         super().__init__(logger=logger, system_instruction=system_instruction)
@@ -74,7 +74,7 @@ class SWEBenchBenchmark(BaseBenchmark):
                     (
                         inputs,
                         {
-                            "max_gen_toks": self.max_tokens,
+                            "max_new_tokens": self.max_tokens,
                             "temperature": 0.2,
                             "top_p": 0.95,
                             "do_sample": False,
