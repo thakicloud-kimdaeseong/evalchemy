@@ -94,7 +94,7 @@ class MMLUProBenchmark(BaseBenchmark):
         self,
         ntrain: int = 5,
         max_model_length: int = 4096,
-        max_new_tokens: int = 2048,
+        max_tokens: int = 32768,
         debug: bool = False,
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
@@ -104,7 +104,7 @@ class MMLUProBenchmark(BaseBenchmark):
         self.dataset_name = "TIGER-Lab/MMLU-Pro"
         self.ntrain = ntrain
         self.max_model_length = max_model_length
-        self.max_new_tokens = max_new_tokens
+        self.max_new_tokens = max_tokens
         self.debug = debug
         self.seed = seed
 
