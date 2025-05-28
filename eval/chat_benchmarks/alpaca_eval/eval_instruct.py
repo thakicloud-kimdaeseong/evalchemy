@@ -105,7 +105,7 @@ class AlpacaBenchmark(BaseBenchmark):
                             (
                                 formatted_instruction,
                                 {
-                                    "max_gen_toks": self.max_tokens,
+                                    "max_new_tokens": self.max_tokens,
                                     "do_sample": self.do_sample,
                                     "temperature": self.temperature,
                                 },
