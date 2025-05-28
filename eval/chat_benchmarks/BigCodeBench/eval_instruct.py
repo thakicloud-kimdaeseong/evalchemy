@@ -166,9 +166,7 @@ class BigCodeBenchBenchmark(BaseBenchmark):
                             (
                                 inputs,
                                 {
-                                    "max_gen_toks": self.max_tokens,
-                                    # "do_sample": False,
-                                    # "top_p": 1.0,
+                                    "max_new_tokens": self.max_tokens,
                                     "temperature": 0,
                                 },
                             ),
