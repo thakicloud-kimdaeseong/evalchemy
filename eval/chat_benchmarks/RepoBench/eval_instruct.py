@@ -27,6 +27,8 @@ class RepoBenchmark(BaseBenchmark):
         max_tokens: int = 128,
         debug: bool = False,
         legacy_mode: bool = False,
+        logger: Optional[logging.Logger] = None,
+        system_instruction: Optional[str] = None,
     ):
         """
         Initialize RepoBench benchmark.
@@ -38,7 +40,7 @@ class RepoBenchmark(BaseBenchmark):
             debug: If true, run on debug mode using 2 samples
             legacy_mode: Whether to use legacy (v0) evaluation
         """
-        super().__init__()
+        super().__init__(logger=logger, system_instruction=system_instruction)
         self.languages = languages
         self.subsets = subsets
         self.max_tokens = max_tokens
