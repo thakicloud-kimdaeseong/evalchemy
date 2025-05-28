@@ -24,7 +24,7 @@ class RepoBenchmark(BaseBenchmark):
         self,
         languages: List[str] = ["python", "java"],
         subsets: List[str] = ["cross_file_first", "cross_file_random", "in_file"],
-        max_tokens: int = 2000,
+        max_tokens: int = 128,
         debug: bool = False,
         legacy_mode: bool = False,
     ):
