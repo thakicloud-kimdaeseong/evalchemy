@@ -35,14 +35,10 @@ class WildBenchConfig:
     end_idx: int = -1
 
     # Model configuration
-    max_tokens: int = 1024
-    temperature: float = 0.0
-    do_sample: bool = False
     engine: str = None
     model_name: str = None
     max_words_to_eval: int = 1000
     repetition_penalty: float = 1.0
-    top_p: float = 1.0
 
     # Evaluation configuration
     model: str = None
@@ -78,6 +74,7 @@ class WildBenchBenchmark(BaseBenchmark):
         config: Optional[WildBenchConfig] = None,
         annotator_model: str = "gpt-4o-mini-2024-07-18",
         debug: bool = False,
+        max_tokens: int = 1024,
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
     ):
@@ -97,6 +94,7 @@ class WildBenchBenchmark(BaseBenchmark):
             config.model = annotator_model
         self.config = config or WildBenchConfig(model=annotator_model)
         self.debug = debug
+        self.max_new_tokens = max_tokens
 
         # Task category mapping
         self.task_group_mapping = {
@@ -190,9 +188,9 @@ class WildBenchBenchmark(BaseBenchmark):
                     (
                         inputs,
                         {
-                            "max_gen_toks": self.config.max_tokens,
-                            "do_sample": self.config.do_sample,
-                            "temperature": self.config.temperature,
+                            "max_new_tokens": self.max_new_tokens,
+                            "do_sample": False,
+                            "temperature": 0.0,
                         },
                     ),
                     idx,
