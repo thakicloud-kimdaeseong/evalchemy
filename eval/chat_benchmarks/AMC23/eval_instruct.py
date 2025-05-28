@@ -29,6 +29,7 @@ class AMC23Benchmark(BaseBenchmark):
         data_file: str = "eval/chat_benchmarks/AMC23/data/amc23.json",
         debug: bool = False,
         seed: List[int] = [0, 1234, 1234, 1234],
+        max_tokens: int = 32768,
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
     ):
@@ -46,7 +47,7 @@ class AMC23Benchmark(BaseBenchmark):
         self.data_file = data_file
         self.debug = debug
         self.seed = seed
-        self.max_new_tokens = 32768  # set higher to avoid truncation for reasoning models
+        self.max_new_tokens = max_tokens  # set higher to avoid truncation for reasoning models
         self.n_repeat = 10
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
