@@ -47,7 +47,7 @@ class CodeForcesBenchmark(BaseBenchmark):
         self,
         debug: bool = False,
         seed: List[int] = [0, 1234, 1234, 1234],
-        max_new_tokens: Optional[int] = 32768,
+        max_tokens: Optional[int] = 32768,
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
     ):
