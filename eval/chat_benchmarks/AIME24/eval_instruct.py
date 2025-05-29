@@ -27,7 +27,7 @@ class AIME24Benchmark(BaseBenchmark):
         data_file: str = "eval/chat_benchmarks/AIME24/data/aime24.json",
         debug: bool = False,
         seed: List[int] = [0, 1234, 1234, 1234],
-        max_tokens: int = 32768,
+        max_tokens: Optional[int] = 32768,
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
     ):
