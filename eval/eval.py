@@ -113,7 +113,7 @@ def setup_custom_parser():
     parser.add_argument(
         "--max_tokens",
         type=str,
-        default="auto",
+        default="None",
         help="Maximum length of model generatd tokens.",
     )
 
@@ -364,7 +364,7 @@ def cli_evaluate(args: Optional[argparse.Namespace] = None) -> None:
     # Initialize tasks
     task_manager = InstructTaskManager(
         annotator_model=args.annotator_model,
-        max_tokens=int(args.max_tokens),
+        max_tokens=int(args.max_tokens) if args.max_tokens else None,
         debug=args.debug,
         seed=args.seed,
         task_list=task_list,
