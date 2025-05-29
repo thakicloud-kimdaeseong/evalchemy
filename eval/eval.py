@@ -113,7 +113,7 @@ def setup_custom_parser():
     parser.add_argument(
         "--max_tokens",
         type=str,
-        default="None",
+        default=None,
         help="Maximum length of model generatd tokens.",
     )
 
