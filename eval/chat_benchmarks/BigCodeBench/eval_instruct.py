@@ -70,7 +70,7 @@ class BigCodeBenchBenchmark(BaseBenchmark):
         self,
         language: str = "python",
         data_dir: str = BIGCODEBENCH_PATH,
-        max_tokens: int = 1280,
+        max_tokens: Optional[int] = 1280,
         num_workers: int = 32,
         timeout: float = 120,
         debug: bool = False,
