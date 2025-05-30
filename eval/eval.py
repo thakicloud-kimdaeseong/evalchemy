@@ -539,7 +539,7 @@ def add_results_metadata(results: Dict, batch_sizes_list: List[int], args: argpa
         "use_cache": args.use_cache,
         "limit": args.limit,
         "annotator_model": args.annotator_model,
-        "max_tokens": int(args.max_tokens),
+        "max_tokens": args.max_tokens if args.max_tokens is not None else "default",
         # "bootstrap_iters": args.bootstrap_iters,
         "gen_kwargs": args.gen_kwargs,
         "random_seed": args.seed[0],
