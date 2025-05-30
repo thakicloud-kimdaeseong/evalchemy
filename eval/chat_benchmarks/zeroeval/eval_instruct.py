@@ -36,8 +36,9 @@ class ZeroEvalBenchmark(BaseBenchmark):
         max_tokens: int = 4096,
         debug: bool = False,
         logger: Optional[logging.Logger] = None,
+        system_instruction: Optional[str] = None,
     ):
-        super().__init__(logger)
+        super().__init__(logger, system_instruction=system_instruction)
         self.tasks = tasks
         self.config = config or ZeroEvalConfig()
         self.max_new_tokens = int(max_tokens)
