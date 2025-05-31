@@ -38,7 +38,6 @@ class LiveBenchBenchmark(BaseBenchmark):
 
     def __init__(
         self,
-        max_new_token: int = 4096,
         dataset_name: str = "live_bench",
         question_source: str = "huggingface",
         temperature: float = 0.0,
@@ -48,6 +47,7 @@ class LiveBenchBenchmark(BaseBenchmark):
         release_date: str = "2024-08-31",
         remove_existing_file: bool = True,
         seed: List[int] = [0, 1234, 1234, 1234],
+        max_tokens: Optional[int] = 4096,
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
     ):
@@ -72,7 +72,7 @@ class LiveBenchBenchmark(BaseBenchmark):
             self.release_date = "2024-06-24"
             self.num_workers = 1
         else:
-            self.max_tokens = max_new_token
+            self.max_tokens = max_tokens if max_tokens is not None else 4096
         self.temperature = temperature
         self.num_choices = num_choices
         self.all_release_dates = ["2024-07-26", "2024-06-24", "2024-08-31", "2024-11-25"]

@@ -71,6 +71,7 @@ class MTBenchBenchmark(BaseBenchmark):
         config: Optional[MTBenchConfig] = None,
         debug: bool = False,
         annotator_model: str = "gpt-4o-mini-2024-07-18",
+        max_tokens: Optional[int] = 1024
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
     ):
@@ -86,6 +87,7 @@ class MTBenchBenchmark(BaseBenchmark):
         """
         super().__init__(logger=logger, system_instruction=system_instruction)
         self.base_path = Path(base_path)
+        self.config.max_new_token = max_tokens if max_tokens is not None else 1024
         if annotator_model == "auto":
             annotator_model = "gpt-4"
         if config:
@@ -114,6 +116,7 @@ class MTBenchBenchmark(BaseBenchmark):
         max_turns = max(len(q["turns"]) for q in questions)
         answer_file = self.answer_dir / f"{model_id}.jsonl"
 
+        self.config.max_new_token = self.max_new_token
         # Process each turn
         for turn_num in range(max_turns):
             self.logger.info(f"Processing Turn {turn_num + 1}")
