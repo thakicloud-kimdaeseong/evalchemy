@@ -20,7 +20,7 @@ class CuratorAPIModel(TemplateLM):
         pretrained: str = None,
         max_length: Optional[int] = 2048,
         max_retries: int = 10,
-        timeout: int = 300,
+        timeout: int = 600,
         tokenized_requests: bool = False,
         max_requests_per_minute: int = None,
         max_tokens_per_minute: int = None,
@@ -64,14 +64,42 @@ class CuratorAPIModel(TemplateLM):
             self.gen_kwargs["temperature"] = kwargs["temperature"]
         if "top_p" in kwargs:
             self.gen_kwargs["top_p"] = kwargs["top_p"]
+        
         self.backend_params = {
             "invalid_finish_reasons": [
                 "content_filter"
-            ],  # So it doesn't retry on `length` finish reason, but retries on "content_filter"}
+            ],  # So it doesn't retry on `length` finish reason, but retries on "content_filter"
             "require_all_responses": False,
-            "request_timeout": timeout,
-            "max_retries": max_retries,
+            "request_timeout": 600,  # Increase timeout to 10 minutes
+            "max_retries": 5,  # Increase retry attempts
         }
+        
+        # Add base_url and api_key for vLLM compatibility
+        if "base_url" in kwargs:
+            # Convert completions URL to chat/completions for vLLM compatibility
+            base_url = kwargs["base_url"]
+            if base_url.endswith("/v1/completions"):
+                base_url = base_url.replace("/v1/completions", "/v1")
+            elif base_url.endswith("/completions"):
+                base_url = base_url.replace("/completions", "")
+            self.backend_params["base_url"] = base_url
+        
+        # Set API key - use provided key or default fake key for vLLM
+        if "api_key" in kwargs:
+            self.backend_params["api_key"] = kwargs["api_key"]
+        elif "base_url" in kwargs:
+            # For vLLM servers, use a fake API key if none provided
+            self.backend_params["api_key"] = "sk-fake-openai-key-for-vllm"
+        else:
+            # For real OpenAI API, let the backend handle missing key error
+            pass
+            
+        # Conservative rate limits for vLLM
+        if max_requests_per_minute is None and "base_url" in kwargs:
+            max_requests_per_minute = 10  # Very conservative
+        if max_tokens_per_minute is None and "base_url" in kwargs:
+            max_tokens_per_minute = 5000  # Very conservative
+            
         if max_requests_per_minute is not None:
             self.backend_params["max_requests_per_minute"] = max_requests_per_minute
         if max_tokens_per_minute is not None:
@@ -112,7 +140,10 @@ class CuratorAPIModel(TemplateLM):
             self.eos = eos
             self.gen_kwargs = gen_kwargs.copy()
             self.llm = curator.LLM(
-                model_name=self.model_name, generation_params=gen_kwargs, backend_params=self.backend_params.copy()
+                model_name=self.model_name,
+                backend="openai",  # Explicitly set backend to openai for vLLM compatibility
+                generation_params=gen_kwargs,
+                backend_params=self.backend_params,
             )
         else:
             if self.gen_kwargs != gen_kwargs:
@@ -121,7 +152,10 @@ class CuratorAPIModel(TemplateLM):
                 )
                 self.gen_kwargs = gen_kwargs.copy()
                 self.llm = curator.LLM(
-                    model_name=self.model_name, generation_params=gen_kwargs, backend_params=self.backend_params.copy()
+                    model_name=self.model_name,
+                    backend="openai",  # Explicitly set backend to openai for vLLM compatibility
+                    generation_params=gen_kwargs,
+                    backend_params=self.backend_params,
                 )
         return messages
 
@@ -157,14 +191,22 @@ class CuratorAPIModel(TemplateLM):
     def tokenizer_name(self) -> str:
         return self.model_name
 
-    def apply_chat_template(self, chat_history: List[Dict[str, str]]) -> Union[str, JsonChatStr]:
+    def apply_chat_template(self, chat_history: List[Dict[str, str]], add_generation_prompt: bool = True, **kwargs) -> Union[str, JsonChatStr]:
         # Convert chat history to the required format
+        # add_generation_prompt is ignored for curator as it handles this internally
         return JsonChatStr(json.dumps(chat_history))
 
     def model_call(self, messages: Union[List[List[int]], List[str], List[JsonChatStr]], **kwargs) -> Optional[dict]:
         payload = self._create_payload(self.create_message(messages), **kwargs)
-        response = self.llm(payload)["response"]
-        return response
+        response = self.llm(payload)
+        # Handle CuratorResponse object
+        if hasattr(response, 'response'):
+            return response.response
+        elif hasattr(response, 'responses'):
+            return response.responses
+        else:
+            # Fallback: try dict access
+            return response["response"] if isinstance(response, dict) else response
 
     def _loglikelihood_tokens(self, requests, **kwargs) -> List[Tuple[float, bool]]:
         raise NotImplementedError("Log likelihood tokens not implemented for curator.")
@@ -191,15 +233,57 @@ class CuratorAPIModel(TemplateLM):
         contexts = [req.args[0] for req in requests]
         gen_kwargs = [req.args[1] for req in requests]
 
-        # Assert all gen_kwargs are the same
-        assert all(
-            gen_kwargs[0] == gkw for gkw in gen_kwargs
-        ), "Generation parameters must be the same for all requests in curator"
+        # Group requests by generation parameters to handle different temperatures
+        from collections import defaultdict
+        grouped_requests = defaultdict(list)
+        
+        for i, (context, gen_kwarg) in enumerate(zip(contexts, gen_kwargs)):
+            # Create a hashable key from gen_kwargs, handling lists and non-hashable types
+            hashable_items = []
+            for k, v in gen_kwarg.items():
+                if isinstance(v, list):
+                    # Convert lists to tuples to make them hashable
+                    hashable_items.append((k, tuple(v)))
+                elif isinstance(v, dict):
+                    # Convert dicts to sorted tuples
+                    hashable_items.append((k, tuple(sorted(v.items()))))
+                else:
+                    hashable_items.append((k, v))
+            key = tuple(sorted(hashable_items))
+            grouped_requests[key].append((i, context, gen_kwarg))
+        
+        # Process each group separately and collect results
+        all_responses = [None] * len(requests)
+        
+        for group_key, group_requests in grouped_requests.items():
+            group_contexts = [req[1] for req in group_requests]
+            group_gen_kwargs = group_requests[0][2]  # All should be the same in this group
 
-        contexts_dataset = self.create_message(contexts)
-        payload = self._create_payload(contexts_dataset, generate=True, gen_kwargs=gen_kwargs[0])
-        response = self.llm(payload)["response"]
-        return response
+            contexts_dataset = self.create_message(group_contexts)
+            payload = self._create_payload(contexts_dataset, generate=True, gen_kwargs=group_gen_kwargs)
+            response = self.llm(payload)
+            
+            # Handle CuratorResponse object
+            if hasattr(response, 'response'):
+                group_responses = response.response
+            elif hasattr(response, 'responses'):
+                group_responses = response.responses
+            elif isinstance(response, dict) and "response" in response:
+                group_responses = response["response"]
+            else:
+                group_responses = response
+            
+            # If response is a single string, convert to list
+            if isinstance(group_responses, str):
+                group_responses = [group_responses] * len(group_contexts)
+            elif not isinstance(group_responses, list):
+                group_responses = [str(group_responses)] * len(group_contexts)
+            
+            # Place responses back in their original positions
+            for (original_idx, _, _), group_response in zip(group_requests, group_responses):
+                all_responses[original_idx] = group_response
+        
+        return all_responses
 
     def loglikelihood_rolling(self, requests, disable_tqdm: bool = False) -> List[float]:
         raise NotImplementedError("Log likelihood rolling not implemented for curator.")

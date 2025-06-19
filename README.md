@@ -26,6 +26,52 @@ Evalchemy is developed by the [DataComp community](https://datacomp.ai) and [Bes
         --model_args 'tokenized_requests=False' \
         --output_path logs
 ```
+
+**Detailed Curator Usage:**
+
+Curator allows for flexible configuration of API-based models. Here are a couple of examples:
+
+1.  **Evaluating on BBH (Big Bench Hard) with a custom VLLM endpoint:**
+
+    This example shows how to run the `bbh` task using a Qwen3-8B model served via a VLLM instance at a specific IP address.
+
+    ```bash
+    python -m eval.eval \
+      --model curator \
+      --tasks bbh \
+      --model_args "base_url=http://10.7.60.170/vllm/v1,model=qwen3-8b,tokenizer=Qwen/Qwen3-8B,tokenizer_backend=huggingface,tokenized_requests=False,max_requests_per_minute=15,max_tokens_per_minute=5000" \
+      --num_fewshot 3 \
+      --batch_size 1 \
+      --limit 10 \
+      --apply_chat_template False \
+      --max_tokens 1000 \
+      --output_path logs/qwen3-8b_bbh_full_results_test.json
+    ```
+    Key `--model_args` for this setup:
+    *   `base_url`: The endpoint of your VLLM (or other compatible API) server.
+    *   `model`: The model identifier as recognized by the API server.
+    *   `tokenizer`: The Hugging Face path or name for the tokenizer.
+    *   `tokenizer_backend`: Specifies to use `huggingface` for tokenization.
+    *   `tokenized_requests=False`: Indicates that the requests to the model should not be pre-tokenized by Curator.
+    *   `max_requests_per_minute`, `max_tokens_per_minute`: Rate limiting parameters.
+
+2.  **Evaluating on AIME24 with similar custom VLLM endpoint:**
+
+    This example demonstrates running the `AIME24` task.
+
+    ```bash
+    python -m eval.eval \
+      --model curator \
+      --tasks AIME24 \
+      --model_args "base_url=http://10.7.60.170/vllm/v1,model=qwen3-8b,tokenizer=Qwen/Qwen3-8B,tokenizer_backend=huggingface,max_requests_per_minute=15,max_tokens_per_minute=5000" \
+      --batch_size 1 \
+      --limit 1 \
+      --apply_chat_template False \
+      --max_tokens 1000 \
+      --output_path logs/qwen3-8b_AIME24_full_results_test.json
+    ```
+    Note the similar use of `base_url`, `model`, `tokenizer`, etc. The `limit` parameter is set to 1 for a quick test run. `apply_chat_template False` is often important when the model endpoint handles its own templating or if you are sending raw prompts.
+
 #### [2025.01.29] New Reasoning Benchmarks
 
 - AIME24, AMC23, MATH500, LiveCodeBench, GPQADiamond, HumanEvalPlus, MBPPPlus, BigCodeBench, MultiPL-E, and CRUXEval have been added to our growing list of [available benchmarks](https://github.com/mlfoundations/evalchemy?tab=readme-ov-file#built-in-benchmarks). This is part of the effort in the [Open Thoughts](https://github.com/open-thoughts/open-thoughts) project. See the [our blog post](https://www.open-thoughts.ai/blog/measure) on using Evalchemy for measuring reasoning models. 
@@ -87,6 +133,24 @@ pip install -e eval/chat_benchmarks/alpaca_eval
 # To:     "fschat @ file:///absolute/path/to/evalchemy/eval/chat_benchmarks/MTBench"
 # Or remove entirely and separately run
 # pip install -e eval/chat_benchmarks/MTBench 
+
+# Log into HuggingFace for datasets and models.
+huggingface-cli login
+```
+
+Alternatively, you can use `venv`:
+```bash
+# Create and activate virtual environment
+python3.10 -m venv venv
+source venv/bin/activate
+
+# Clone the repo
+git clone git@github.com:mlfoundations/evalchemy.git
+cd evalchemy
+
+# Install dependencies
+pip install -e .
+pip install -e eval/chat_benchmarks/alpaca_eval
 
 # Log into HuggingFace for datasets and models.
 huggingface-cli login
