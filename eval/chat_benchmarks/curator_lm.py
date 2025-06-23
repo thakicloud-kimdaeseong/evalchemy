@@ -60,7 +60,7 @@ class CuratorAPIModel(TemplateLM):
         self,
         model: str = None,
         pretrained: str = None,
-        max_length: Optional[int] = 2048,
+        max_length: Optional[int] = 14000,
         max_retries: int = 10,
         timeout: int = 600,
         tokenized_requests: bool = False,
@@ -163,7 +163,10 @@ class CuratorAPIModel(TemplateLM):
     ) -> dict:
         assert generate, "Curator only supports generation."
         # Create the payload for the API request
-        max_tokens = self.max_length or gen_kwargs.get("max_gen_toks", self.max_length)
+        # max_new_tokens를 우선적으로 사용하고, 없으면 max_gen_toks, 마지막으로 self.max_length 사용
+        max_tokens = (gen_kwargs.get("max_new_tokens") or 
+                     gen_kwargs.get("max_gen_toks") or 
+                     self.max_length)
         temperature = self.gen_kwargs.get("temperature", gen_kwargs.get("temperature", 0))
         top_p = self.gen_kwargs.get("top_p", gen_kwargs.get("top_p", 0.95))
         stop = handle_stop_sequences(gen_kwargs.get("until", None), eos)
