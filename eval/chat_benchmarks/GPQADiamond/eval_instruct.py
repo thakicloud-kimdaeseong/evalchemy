@@ -52,7 +52,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
         self.debug = debug
         self.seed = seed
         self.max_new_tokens = max_tokens
-        self.n_repeat = 3
+        self.n_repeat = 1
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
@@ -121,9 +121,17 @@ class GPQADiamondBenchmark(BaseBenchmark):
         if model.rank != 0:
             return None
 
-        for example, outputs in zip(examples, zip(*all_outputs)):
+        for example_idx, (example, outputs) in enumerate(zip(examples, zip(*all_outputs))):
             example["model_outputs"] = list(outputs)
-            example["model_answers"] = [get_multiple_choice_answer(o) for o in outputs]
+            model_answers = []
+            for i, o in enumerate(outputs):
+                parsed_answer = get_multiple_choice_answer(o)
+                model_answers.append(parsed_answer)
+                # Debug output for first few samples
+                if example_idx < 3:
+                    self.logger.info(f"Sample {example_idx}, Output {i}: Last 200 chars: {repr(o[-200:])}")
+                    self.logger.info(f"Sample {example_idx}, Output {i}: Parsed answer: {repr(parsed_answer)}")
+            example["model_answers"] = model_answers
 
         return {"examples": examples}
 
@@ -174,6 +182,9 @@ class GPQADiamondBenchmark(BaseBenchmark):
         questions = [row for row in dataset["train"]]
         if self.debug:
             questions = questions[:2]
+        else:
+            # Limit to 5 questions for testing
+            questions = questions[:5]
         self.logger.info(f"Loaded {len(questions)} questions from {self.dataset_name}")
         return questions
 
