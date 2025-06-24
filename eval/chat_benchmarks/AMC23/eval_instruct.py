@@ -183,7 +183,39 @@ class AMC23Benchmark(BaseBenchmark):
             str: Extracted final answer. Returns empty string if no answer found in \boxed.
         """
         try:
+            # 먼저 기본 방법으로 시도
             answer = remove_boxed(last_boxed_only_string(output))
-            return answer
+            if answer:  # 빈 문자열이 아니면 반환
+                return answer
         except:
-            return ""
+            pass
+        
+        try:
+            # 응답이 잘린 경우를 위한 대안적 방법들
+            # 1. \\boxed{ 패턴 찾기 (닫힌 괄호가 없어도)
+            import re
+            boxed_pattern = r'\\boxed\{([^}]*)\}'
+            matches = re.findall(boxed_pattern, output)
+            if matches:
+                return matches[-1]  # 마지막 매치 반환
+            
+            # 2. "Final Answer"나 "Answer:" 뒤의 숫자 찾기
+            final_answer_patterns = [
+                r'Final Answer[:\s]*.*?(\d+)',
+                r'Answer[:\s]*(\d+)',
+            ]
+            
+            for pattern in final_answer_patterns:
+                matches = re.findall(pattern, output, re.IGNORECASE)
+                if matches:
+                    return matches[-1]  # 마지막 매치 반환
+            
+            # 3. 가장 마지막에 나타나는 숫자 (일반적으로 답일 가능성이 높음)
+            numbers = re.findall(r'\b\d+\b', output)
+            if numbers:
+                return numbers[-1]
+                
+        except:
+            pass
+            
+        return ""
